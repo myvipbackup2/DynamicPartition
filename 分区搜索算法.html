@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>分区搜索算法-20143223李子翔</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        ul, li {
+            list-style: none;
+        }
+
+        body {
+            background: #25313e;
+        }
+
+        header {
+            text-align: center;
+            color: #ffffff;
+            font-size: 26px;
+            margin-top: 50px;
+        }
+
+        #container {
+            margin: 100px auto;
+            font-weight: bolder;
+            width: 500px;
+            height: 500px;
+            background: grey;
+            position: relative;
+        }
+
+        #content {
+            position: absolute;
+            width: 500px;
+            height: 420px;
+            background: #dddddd;
+            font-size: 30px;
+        }
+
+        #size {
+            position: absolute;
+            width: 250px;
+            height: 420px;
+            left: 0;
+        }
+
+        #address {
+            position: absolute;
+            width: 250px;
+            height: 420px;
+            left: 250px;
+            top: 0;
+        }
+
+        li {
+            height: 60px;
+            line-height: 60px;
+            text-align: center;
+            transition: transform 2s;
+        }
+
+        #foot {
+            position: absolute;
+            width: 500px;
+            height: 80px;
+            bottom: 0;
+            text-align: center;
+            line-height: 80px;
+        }
+
+        span {
+            padding: 10px 20px;
+            color: #ffffff;
+            background: #00a4d8;
+            border: 2px solid #00a4d8;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+
+        span:hover {
+            background-color: #32c146;
+            border: 2px solid #32c146;
+        }
+
+        #num {
+            border: none;
+            outline: none;
+            text-align: center;
+            font-size: 16px;
+            padding: 10px;
+            width: 120px;
+            height: 20px;
+            border-radius: 25px;
+        }
+    </style>
+</head>
+<body onselectstart="return false">
+<header>分区搜索算法-20143223李子翔</header>
+<div id="container">
+    <div id="content">
+        <ul id="size">
+            <li>分区大小(KB)</li>
+            <li>80</li>
+            <li>20</li>
+            <li>200</li>
+            <li>100</li>
+            <li>60</li>
+            <li>120</li>
+        </ul>
+        <ul id="address">
+            <li>分区起止大小(KB)</li>
+            <li>100</li>
+            <li>200</li>
+            <li>300</li>
+            <li>700</li>
+            <li>800</li>
+            <li>900</li>
+        </ul>
+    </div>
+    <div id="foot">
+        <input id="num" placeholder="请输入分配数量" onfocus="this.value=''" onkeyup='this.value=this.value.replace(/\D/gi,"")'/>
+        <span id="firAdapt">首次适应</span>
+        <span id="preAdapt">最佳适应</span>
+        <span id="reset">回收内存</span>
+    </div>
+</div>
+<script>
+    window.onload = function () {
+        (function () {
+            var oFirAdapt = document.getElementById('firAdapt');
+            var oPreAdapt = document.getElementById('preAdapt');
+            var oReset = document.getElementById('reset');
+            var oSize = document.getElementById('size');
+            var oAddress = document.getElementById('address');
+            var aSize = oSize.getElementsByTagName('li');
+            var aAddress = oAddress.getElementsByTagName('li');
+            var arrSize = [];
+            var arrDynamic = [];
+            var oInput = document.getElementById('num');
+            var i = 0;
+            for (i = 0; i < aSize.length; i++) {
+                arrSize[i] = aSize[i].innerText;
+                aAddress[i] = aAddress[i].innerText;
+            }
+            oFirAdapt.onclick = function () {
+                for (i = 1; i < aSize.length; i++) {
+                    aSize[i].style.transform = '';
+                    aSize[i].style.backgroundColor = '';
+                    aAddress[i].style.transform = '';
+                    aAddress[i].style.backgroundColor = '';
+                }
+                var num = parseInt(oInput.value);
+                for (i = 1; i < arrSize.length; i++) {
+                    if (parseInt(arrSize[i]) >= num) {
+                        aSize[i].innerText = parseInt(aSize[i].innerText) - num;
+                        aAddress[i].innerText = parseInt(aAddress[i].innerText) + num;
+                        aSize[i].style.transform = 'rotate(360deg)';
+                        aSize[i].style.backgroundColor = '#00a4d8';
+                        aAddress[i].style.transform = 'rotate(360deg)';
+                        aAddress[i].style.backgroundColor = '#00a4d8';
+                        for (i = 0; i < aSize.length; i++) {
+                            arrSize[i] = aSize[i].innerText;
+                            aAddress[i] = aAddress[i].innerText;
+                        }
+                        return;
+                    }
+                }
+            };
+            oPreAdapt.onclick = function () {
+                for (i = 1; i < aSize.length; i++) {  //初始化状态
+                    aSize[i].style.transform = '';
+                    aSize[i].style.backgroundColor = '';
+                    aAddress[i].style.transform = '';
+                    aAddress[i].style.backgroundColor = '';
+                }
+                arrDynamic = []; //清空数组
+                var num = parseInt(oInput.value);
+                for (i = 1; i < arrSize.length; i++) {
+                    if (parseInt(arrSize[i]) >= num) {
+                        var oElem = {};
+                        oElem.num = parseInt(aSize[i].innerText) - num;
+                        oElem.index = i;
+                        oElem.toString = function () {
+                            return this.num;
+                        };
+                        arrDynamic[i - 1] = oElem;
+                    }
+                }
+                arrDynamic.sort(function (a, b) {
+                    return a - b;
+                });
+                aSize[arrDynamic[0].index].innerText -= num;  //-可以强制转换
+                aAddress[arrDynamic[0].index].innerText = parseInt(aAddress[arrDynamic[0].index].innerText) + num;
+                aSize[arrDynamic[0].index].style.transform = 'rotate(360deg)';
+                aSize[arrDynamic[0].index].style.backgroundColor = '#00a4d8';
+                aAddress[arrDynamic[0].index].style.transform = 'rotate(360deg)';
+                aAddress[arrDynamic[0].index].style.backgroundColor = '#00a4d8';
+                for (i = 0; i < aSize.length; i++) {
+                    arrSize[i] = aSize[i].innerText;
+                    aAddress[i] = aAddress[i].innerText;
+                }
+            };
+            oReset.onclick = function () {
+                window.location.reload();
+            };
+        })();
+    }
+</script>
+</body>
+</html>
